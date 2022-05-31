@@ -9,14 +9,23 @@
     font-family: Arial, Helvetica, sans-serif;
     box-sizing: border-box;
 }
+.wrapper {
+    width: 100%;
+}
 #header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-evenly;
     background-color: var(--header-color);
     padding: 15px 0;
     position: sticky;
     top: 0;
+    gap: 20px;
+}
+.filters-container {
+    width: 100%;
+    height: 20vh;
 }
 a {
     text-decoration: none;
@@ -31,17 +40,13 @@ a {
 #logo:hover {
     cursor: pointer;
 }
-#logo-icon {
-    height: 60px;
-    width: 60px;
-    border-radius: 50%;
-    background-color: white;
+#logo a {
     display: flex;
     align-items: center;
-    justify-content: center;
 }
-#logo-icon img {
-    height: 70%;
+#logo-img {
+    height: 60px;
+    width: 60px;
 }
 #logo-title {
     font-size: 54px;
@@ -68,8 +73,8 @@ a {
     border-top: 1.5px solid var(--header-color);
     border-left:1.5px solid var(--header-color);
 }
-#navbar-2 a {
-    font-size: 24px;
+.currency-info {
+    color: green;
 }
 #navbar-2 a:hover {
     font-size: 26px;
@@ -114,23 +119,38 @@ a {
     display: grid;
     grid-template-columns: auto;
 }
-/* #sidebar {
-    height: 100%;
-}
-#inner-sidebar {
-    margin: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid black;
-} */
-#main {
+.main {
     padding: 20px;
     height: 100%;
     display: grid;
     grid-template-columns: auto auto auto auto auto;
     justify-content: space-evenly;
     gap: 30px;
+}
+.main-cart {
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 20px;
+}
+.cart-empty {
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+.cart-empty .product {
+    width: 100%;
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
 }
 .product {
     display: flex;
@@ -141,10 +161,31 @@ a {
     padding: 10px;
     width: 220px;
 }
+.product-cart {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 1fr;
+    width: 100%;
+    height: 300px;
+    align-items: center;
+    gap: 20px;
+    padding: 10px;
+    background-color: wheat;
+}
+.product-cart img { 
+    margin: 0 auto;
+    width: 60%;
+    height: 250px;
+}
 .product p {
     font-size: 14px;
 }
-.product img{
+.description {
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.img{
     width: 100%;
     height: 250px;
 }

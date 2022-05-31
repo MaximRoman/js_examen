@@ -602,7 +602,7 @@ let clothes = [
 ]
 const rate = {}
 const currencySimbols = { usd: "$" , eur: "€" , mdl: "Lei" }
-let cart = []
+let cart = JSON.parse(localStorage.getItem("clothesCart")) || []
 let cartOnScreen = false
 
 extractFromLocalStorage()
@@ -616,21 +616,39 @@ async function getCurrencyData() {
     rate.usd = 1
     rate.eur = parseFloat(result.usd.eur.toFixed(2))
     rate.mdl = parseFloat(result.usd.mdl.toFixed(2))
-    showProducts(clothes, rate[$("#currency").val()])
+    setCurrencyInfo()
+    if (!cartOnScreen) {    
+        showProducts(clothes, rate[$("#currency").val()])
+    } else {
+        cartOnScreen = false
+        cartClick()
+    }
 }
 
+function setCurrencyInfo(){
+    $("#navbar-2").html("")
+    $("#navbar-2").append(`
+        <div class="currency-info">
+            <h3>1$ => ${rate.eur}€</h3>
+            <h3>1$ => ${rate.mdl}Lei</h3>
+        </div>
+    `)
+}
 
 // afisarea produselor
 function showProducts(arr, rateValue) {
     $("#main").html("")
+    $("#quantity-in-cart").attr("value", `${cart.length}`)
+    $("#quantity-in-cart").html(`${cart.length}`)
     arr.forEach(item => {
         // calcularea pretului intr-o anumita valuta
         let price = item.price * rateValue
-        const itemIsInCart = cart.filter(cartItem => cartItem === item)
-        if(itemIsInCart.length === 0) {
+        $("#main").removeClass("main-cart")
+        $("#main").addClass("main")
+        if (item.stock > 0) {
             $("#main").append(`
                 <div class="product">
-                    <img src="${item.image}" alt="${item.color} ${item.type}"/>
+                    <img src="${item.image}" alt="${item.color} ${item.type}" class="img"/>
                     <h4>${item.name}</h4>
                     <p>${item.description}</p>
                     <small class="stock"><span style="color: black;">In Stock:</span> ${item.stock}</small>
@@ -638,24 +656,15 @@ function showProducts(arr, rateValue) {
                     <button id="btn-${item.id}" class="btn" onclick=addToCart(${item.id})>Add to Cart</button>
                 </div>
             `)
-        } else {
-            $("#main").append(`
-                <div class="product">
-                    <img src="${item.image}" alt="${item.color} ${item.type}"/>
-                    <h4>${item.name}</h4>
-                    <p>${item.description}</p>
-                    <small class="stock"><span style="color: black;">In Stock:</span> ${item.stock}</small>
-                    <h1 class="price">${price.toFixed(2)} ${currencySimbols[$("#currency").val()]}</h1>
-                    <button id="btn-${item.id}" class="btn" onclick=addToCart(${item.id})>Add to Cart</button>
-                </div>
-            `)
-            $(`#btn-${item.id}`).html(`<i class="fa-solid fa-check" style="font-weight: bold;"></i> In Cart!`)
-            $(`#btn-${item.id}`).css({
-                "font-weight": "bold"
-            })
-            $(`#btn-${item.id}`).removeClass("btn")
-            $(`#btn-${item.id}`).addClass("clicked-btn") 
         }
+    })
+    cart.forEach(item => {
+        $(`#btn-${item.id}`).html(`<i class="fa-solid fa-check" style="font-weight: bold;"></i> In Cart!`)
+        $(`#btn-${item.id}`).css({
+            "font-weight": "bold"
+        })
+        $(`#btn-${item.id}`).removeClass("btn")
+        $(`#btn-${item.id}`).addClass("clicked-btn") 
     })
 }
 
@@ -678,33 +687,29 @@ function addToCart(id) {
 
     if(itemIsInCart.length == 0) {
         cart.push(item)
-        let finalQuantity = parseInt($("#quantity-in-cart").val()) + 1
-        $("#quantity-in-cart").attr("value", `${finalQuantity}`)
-        $("#quantity-in-cart").html(`${finalQuantity}`)
         $(`#btn-${id}`).html(`<i class="fa-solid fa-check" style="font-weight: bold;"></i> In Cart!`)
         $(`#btn-${id}`).css({
             "font-weight": "bold"
         })
         $(`#btn-${id}`).removeClass("btn")
         $(`#btn-${id}`).addClass("clicked-btn")   
+        localStorage.setItem("clothesCart", JSON.stringify(cart))
     }
+    $("#quantity-in-cart").attr("value", `${cart.length}`)
+    $("#quantity-in-cart").html(`${cart.length}`)
 }
-
-$("#logo").click(turnBack)
-
-$("#cart").click(cartClick)
 
 function cartClick() {
     if(!cartOnScreen) {
-        $("#main").slideUp(1)
         $("#main").html("")
         if(cart.length > 0) {
             cart.forEach(item => {
-                $("#main").slideDown(500)
                 let price = item.price * rate[$("#currency").val()]
+                $("#main").removeClass("main")
+                $("#main").addClass("main-cart")
                 $("#main").append(`
-                    <div class="product">
-                        <img src="${item.image}" alt="${item.color} ${item.type}"/>
+                    <div class="product-cart">
+                        <img src="${item.image}" alt="${item.color} ${item.type}" class="img"/>
                         <div class="description">
                             <h4>${item.name}</h4>
                             <p>${item.description}</p>
@@ -733,103 +738,22 @@ function cartClick() {
                     } 
                 })
             })
-            styleMainCart(1)
         } else {
-            $("#main").slideDown(500)
             $("#main").html(`
             <div class="product">
                 <h1 class="error-message">Your cart is empty!</h1>
             </div>
             `)
-            styleMainCart(2)
+            $("#main").removeClass("main")
+            $("#main").addClass("cart-empty")
         }
         cartOnScreen = true
     } else {
-        turnBack()
-    }
-}
-
-function turnBack() {
-    $("#main").slideUp(1)
-    $("#main").slideDown(500)
-    $("#main").css({
-        "padding": "20px",
-        "height": "100%",
-        "display": "grid",
-        "grid-template-columns": "auto auto auto auto auto",
-        "justify-content": "space-evenly",
-        "gap": "30px",
-    })
-    $(".product").css({
-        "display": "flex",
-        "flex-direction": "column",
-        "justify-content": "space-around",
-        "align-items": "flex-start",
-        "background-color": "wheat",
-        "padding": "10px",
-        "width": "220px",
-    })
-    $(".product").children("img").css({
-        "width": "100%",
-        "height": "250px",
-    })
-    $(".btn").css({
-        "width": "100%",
-        "font-size": "30px",
-        "color": "green",
-        "border": "2px solid black",
-        "outline": "none",
-        "padding": "10px 0",
-    })
-    extractFromLocalStorage()
-    cartOnScreen = false
-}
-
-function styleMainCart(value) {
-    switch(value) {
-        case 1: 
-            $("#main").css({
-                "padding": "20px",
-                "height": "100%",
-                "display": "flex",
-                "flex-direction": "column",
-                "justify-content": "flex-start",
-                "align-items": "flex-start",
-            })
-            $(".product").css({
-                "display": "grid",
-                "grid-template-columns": "1.5fr 2fr 1fr",
-                "width": "100%",
-                "height": "300px",
-                "align-items": "center",
-                "justify-content": "space-evenly",
-                "gap": "20px",
-                "padding": "10px",
-            })
-            $(".description").css({
-                "height": "80%",
-                "display": "flex",
-                "flex-direction": "column",
-                "justify-content": "space-around",
-            })
-            break
-        case 2: 
-            $("#main").css({
-                "padding": "20px",
-                "height": "100%",
-                "display": "flex",
-                "flex-direction": "column",
-                "justify-content": "flex-start",
-                "align-items": "flex-start",
-            })
-            $(".product").css({
-                "width": "100%",
-                "height": "250px",
-                "flex-direction": "column",
-                "justify-content": "space-evenly",
-                "align-items": "center",
-            })
-            break
+        $("#main").removeClass("cart-empty")
+        $("#main").removeClass("main-cart")
+        $("#main").addClass("main")
+        extractFromLocalStorage()
+        cartOnScreen = false
     }
 }
 
@@ -870,6 +794,24 @@ function deleteFromCart(id) {
     let finalQuantity = parseInt($("#quantity-in-cart").val()) - 1
     $("#quantity-in-cart").attr("value", `${finalQuantity}`)
     $("#quantity-in-cart").html(`${finalQuantity}`)
+    localStorage.setItem("clothesCart", JSON.stringify(cart))
     cartOnScreen = false
     cartClick()
 }
+
+function openFilters() {
+    $("#header").append(`
+        <div class="filters-container">
+        </div>
+    `)
+}
+
+$("#cart").click(cartClick)
+
+$("#women-filters").click(openFilters)
+
+$("#men-filters").click(openFilters)
+
+$("#kids-filters").click(openFilters)
+
+$("#other-filters").click(openFilters)
