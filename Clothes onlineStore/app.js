@@ -1,4 +1,4 @@
-let clothes = [
+const clothes = [
    {
         id: 1,
         name: "Unisex CVC Jersey Tee",
@@ -484,7 +484,7 @@ let clothes = [
         name: "Trucker Cap",
         description: "Herringbone Unstructured Contrast Stitch Trucker Cap - Mega Cap 6990B",
         color: "Black Denim/ White",
-        type: "Cap",
+        type: "cap",
         category: "other",
         image: "images/products images/id=41.jpg",
         stock: 50,
@@ -604,6 +604,7 @@ const rate = {}
 const currencySimbols = { usd: "$" , eur: "€" , mdl: "Lei" }
 let cart = JSON.parse(localStorage.getItem("clothesCart")) || []
 let cartOnScreen = false
+let filtersContainer = false
 
 extractFromLocalStorage()
 
@@ -799,19 +800,138 @@ function deleteFromCart(id) {
     cartClick()
 }
 
-function openFilters() {
-    $("#header").append(`
-        <div class="filters-container">
-        </div>
-    `)
+function filterByCategory(category) {
+    const arr = clothes.filter(item => item.category === category)
+    showProducts(arr,  rate[$("#currency").val()])
 }
 
-$("#cart").click(cartClick)
+function createFilterByCategory() {
+    $("#filter-by-category").html(`
+        <h3 id="category-title" class="filter-title">Category <i id="display-filters-arrow" class="fa-solid fa-angle-down"></i></h3>
+        <div id="category-items"></div>
+    `)
+    let categories = []
+    clothes.forEach(item => {
+        if (categories.filter(catItem => catItem === item.category).length === 0) {
+            categories.push(item.category)
+            $("#category-items").append(`
+                <div id="filter-${item.category}" class="filter">
+                    <input type="checkbox" name="category" id="${item.category}">
+                    <label for="${item.category}">${item.category.toLowerCase()}</label>
+                </div>
+            `)
+        }
+    })
+    
+    $("#category-items").hide()
 
-$("#women-filters").click(openFilters)
+    $("#category-title").click(() => closeOpenFilter("category"))
+}
 
-$("#men-filters").click(openFilters)
+function createFilterByType() {
+    $("#filter-by-type").html(`
+        <h3 id="type-title" class="filter-title">Type <i id="display-filters-arrow" class="fa-solid fa-angle-down"></i></h3>
+        <div id="type-items"></div>
+    `)
+    let types = []
+    clothes.forEach(item => {
+        if (types.filter(typeItem => typeItem === item.type).length === 0) {
+            types.push(item.type)
+            $("#type-items").append(`
+                <div id="filter-${item.type}" class="filter">
+                    <input type="checkbox" name="type" id="${item.type}">
+                    <label for="${item.type}">${item.type.toLowerCase()}</label>
+                </div>
+            `)
+        }
+    })
+    
+    $("#type-items").hide()
 
-$("#kids-filters").click(openFilters)
+    $("#type-title").click(() => closeOpenFilter("type"))
+}
 
-$("#other-filters").click(openFilters)
+function createFilterByColor() {
+    $("#filter-by-color").html(`
+        <h3 id="color-title" class="filter-title">Color <i id="display-filters-arrow" class="fa-solid fa-angle-down"></i></h3>
+        <div id="color-items"></div>
+    `)
+    let colors = []
+    clothes.forEach(item => {
+        if (colors.filter(colorItem => colorItem === item.color).length === 0) {
+            colors.push(item.color)
+            $("#color-items").append(`
+                <div id="filter-${item.color}" class="filter">
+                    <input type="checkbox" name="color" id="${item.color}">
+                    <label for="${item.color}">${item.color.toLowerCase()}</label>
+                </div>
+            `)
+        }
+    })
+
+    $("#color-items").hide()
+
+    $("#color-title").click(() => closeOpenFilter("color"))
+}
+
+function createFilterByPrice() {
+    $("#filter-by-price").html(`
+        <h3 id="price-title" class="filter-title">Price <i id="display-filters-arrow" class="fa-solid fa-angle-down"></i></h3>
+        <div id="price-items"></div>
+    `)
+
+    $("#price-items").append(`
+        <div id="asc-desc" class="filter">
+            <div class="filter">
+                <input type="radio" id="asc" name="asc-desc">
+                <label for="asc">Expensive</label>
+            </div>
+            <div class="filter">
+                <input type="radio" id="desc" name="asc-desc">
+                <label for="desc">Cheaper</label>
+            </div>
+        </div>
+        <br>
+        <div id="between" class="filter">
+            <label for="min-price">Minimal Price</label>
+            <br>
+            <input type="number" id="min-price">
+            <br>
+            <br>
+            <label for="max-price">Maximal Price</label>
+            <br>
+            <input type="number" id="max-price">
+        </div>
+    `)
+
+    $("#price-items").hide()
+
+    $("#price-title").click(() => closeOpenFilter("price"))
+}
+
+function closeOpenFilter(title) {
+    $(`#${title}-items`).toggle()
+    $(`#${title}-title`).children("i").toggleClass("fa-angle-down")
+    $(`#${title}-title`).children("i").toggleClass("fa-angle-up")
+}
+
+function resetFilters() {    
+    createFilterByCategory()
+    createFilterByType()
+    createFilterByColor()
+    createFilterByPrice()
+}
+
+resetFilters()
+
+$("#cart").click(() => {
+    cartClick()
+    resetFilters()
+})
+
+$("#display-filters").click(() => {
+    $("#filters").toggleClass("hide-filters-container")
+    $("#filters").toggleClass("show-filters-container")
+    $("#display-filters-arrow").toggleClass("fa-angle-down")
+    $("#display-filters-arrow").toggleClass("fa-angle-up")
+})

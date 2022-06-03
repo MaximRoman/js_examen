@@ -30,12 +30,10 @@
             <div id="logo">
                 <a href="index.html" id="logo-title"><img src="./images/logo_icon.png" alt="This stores logo" id="logo-img">Style</a>
             </div>
-            <nav id="navbar-1">
-                <a href="#" id="women-filters">Women</a>
-                <a href="#" id="men-filters">Men</a>
-                <a href="#" id="kids-filters">Kids</a>
-                <a href="#" id="other-filters">Other</a>
-            </nav>
+            <div class="search" id="navbar-1">
+                <input type="text" placeholder="Search">
+                <button><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
             <div id="navbar-2">
             </div>
             <nav id="navbar-3">
@@ -46,9 +44,20 @@
                         <option value="mdl">MDL L</option>
                     </select>
                 </div>
-                <a href="#"><i class="fa-solid fa-magnifying-glass"></i></a>
                 <a href="#" id="cart"><i class="fa-solid fa-cart-shopping"></i><button id="quantity-in-cart" value="0">0</button></a>
             </nav>
+            <button id="display-filters">Filters <i id="display-filters-arrow" class="fa-solid fa-angle-down"></i></button>
+        </div>
+        <div id="filters" class="hide-filters-container">
+            <h1>Filters:</h1>
+            <div id="filter-by-category">
+            </div>
+            <div id="filter-by-type">
+            </div>
+            <div id="filter-by-color">
+            </div>
+            <div id="filter-by-price">
+            </div>
         </div>
         <div id="container">
             <div id="main" class="main">

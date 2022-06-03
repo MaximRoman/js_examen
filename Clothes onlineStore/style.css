@@ -11,6 +11,7 @@
 }
 .wrapper {
     width: 100%;
+    background-color: gray;
 }
 #header {
     display: flex;
@@ -19,13 +20,7 @@
     justify-content: space-evenly;
     background-color: var(--header-color);
     padding: 15px 0;
-    position: sticky;
-    top: 0;
     gap: 20px;
-}
-.filters-container {
-    width: 100%;
-    height: 20vh;
 }
 a {
     text-decoration: none;
@@ -54,24 +49,30 @@ a {
 }
 #navbar-1 {
     display: flex;
-    column-gap: 5px;
+    border: 1px solid black;
 }
-#navbar-1 a {
+#navbar-1 input {
+    border: none;
+    outline: none;
+    padding: 10px;
+    font-size: 18px;
+    width: 30vw;
+}
+#navbar-1 button {
     display: flex;
     align-items: center;
     column-gap: 4px;
-    font-size: 24px;
-    border-bottom: 3px solid black;
-    border-right: 3px solid black;
-    border-top: 1.5px solid black;
-    border-left: 1.5px solid black;
-    padding: 3px 5px;
+    font-size: 18px;
+    padding: 3px 10px;
+    border: none;
+    outline: none;
+    background-color: rgba(0, 128, 0, 0.466);
 }
-#navbar-1 a:hover {
-    border-bottom: 2px solid black;
-    border-right: 2px solid black;
-    border-top: 1.5px solid var(--header-color);
-    border-left:1.5px solid var(--header-color);
+#navbar-1 button:hover {
+    cursor: pointer;
+}
+#navbar-1 button:active {
+    background-color: rgba(0, 128, 0, 0.726);
 }
 .currency-info {
     color: green;
@@ -110,6 +111,41 @@ a {
     outline: none;
 }
 #currency:hover {
+    cursor: pointer;
+}
+label:hover,
+input[type="checkbox"]:hover,
+input[type="radio"]:hover {
+    cursor: pointer;
+}
+.filter {
+    margin-bottom: 3px;
+}
+#filters {
+    width: 100%;
+    margin: 20px 0;
+}
+.hide-filters-container {
+    display: none;
+}
+.show-filters-container {
+    display: grid;
+    padding: 0 100px;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    align-items: flex-start;
+}
+#display-filters{
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+}
+.filter-title {
+    margin-bottom: 10px;
+    width: fit-content;
+}
+.filter-title:hover {
     cursor: pointer;
 }
 #container {
