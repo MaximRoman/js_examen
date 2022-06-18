@@ -626,6 +626,7 @@ async function getCurrencyData() {
     }
 }
 
+// afisarea la ecran a cursului valutar in header
 function setCurrencyInfo(){
     $("#navbar-2").html("")
     $("#navbar-2").append(`
@@ -648,24 +649,21 @@ function showProducts(arr, rateValue) {
         $("#main").addClass("main")
         if (item.stock > 0) {
             $("#main").append(`
-                <div class="product">
+                <div class="product col-3 d-flex flex-column justify-content-around align-items-center text-light border border-light p-3">
                     <img src="${item.image}" alt="${item.color} ${item.type}" class="img"/>
                     <h4>${item.name}</h4>
                     <p>${item.description}</p>
-                    <small class="stock"><span style="color: black;">In Stock:</span> ${item.stock}</small>
-                    <h1 class="price">${price.toFixed(2)} ${currencySimbols[$("#currency").val()]}</h1>
-                    <button id="btn-${item.id}" class="btn" onclick=addToCart(${item.id})>Add to Cart</button>
+                    <small class="stock text-danger"><span>In Stock:</span> ${item.stock}</small>
+                    <h1 class="price text-success">${price.toFixed(2)} ${currencySimbols[$("#currency").val()]}</h1>
+                    <button id="btn-${item.id}" class="btn btn-outline-success container" onclick=addToCart(${item.id})>Add to Cart</button>
                 </div>
             `)
         }
     })
     cart.forEach(item => {
         $(`#btn-${item.id}`).html(`<i class="fa-solid fa-check" style="font-weight: bold;"></i> In Cart!`)
-        $(`#btn-${item.id}`).css({
-            "font-weight": "bold"
-        })
-        $(`#btn-${item.id}`).removeClass("btn")
-        $(`#btn-${item.id}`).addClass("clicked-btn") 
+        $(`#btn-${item.id}`).removeClass("btn-outline-success")
+        $(`#btn-${item.id}`).addClass("btn-success") 
     })
 }
 
@@ -682,24 +680,23 @@ $("#currency").change(() => {
     getCurrencyData()
 })
 
+// adaugarea in Cart
 function addToCart(id) {
     const item = clothes.filter(item => item.id === id)[0]
-    const itemIsInCart = cart.filter(cartItem => cartItem === item)
+    const itemIsInCart = cart.filter(cartItem => cartItem.id === id)
 
-    if(itemIsInCart.length == 0) {
+    if(itemIsInCart.length === 0) {
         cart.push(item)
         $(`#btn-${id}`).html(`<i class="fa-solid fa-check" style="font-weight: bold;"></i> In Cart!`)
-        $(`#btn-${id}`).css({
-            "font-weight": "bold"
-        })
-        $(`#btn-${id}`).removeClass("btn")
-        $(`#btn-${id}`).addClass("clicked-btn")   
+        $(`#btn-${item.id}`).removeClass("btn-outline-success")
+        $(`#btn-${item.id}`).addClass("btn-success") 
         localStorage.setItem("clothesCart", JSON.stringify(cart))
+        $("#quantity-in-cart").attr("value", `${cart.length}`)
+        $("#quantity-in-cart").html(`${cart.length}`)
     }
-    $("#quantity-in-cart").attr("value", `${cart.length}`)
-    $("#quantity-in-cart").html(`${cart.length}`)
 }
 
+// afisarea produselor din Cart (la tastarea repetata se afiseaza produsele de pe pagina principala)
 function cartClick() {
     if(!cartOnScreen) {
         $("#main").html("")
@@ -758,6 +755,7 @@ function cartClick() {
     }
 }
 
+// adauga inca un produs la produselor spre achitare si calcularea pretului total a acestora
 function increment(id) {
     let item = cart.filter(cartItem => cartItem.id === id)[0]
     let newQnt = parseInt($(`#quantity-${id}`).html()) + 1
@@ -769,6 +767,7 @@ function increment(id) {
     }
 }
 
+// elimina un produs de la produselor spre achitare si calcularea pretului total a acestora
 function decrement(id) {
     let item = cart.filter(cartItem => cartItem.id === id)[0]
     let newQnt = parseInt($(`#quantity-${id}`).html()) - 1
@@ -780,6 +779,7 @@ function decrement(id) {
     }
 }
     
+// procurarea unui anumit produs
 function buyProducts(id) {
     clothes.filter(item => {
         if(item.id === id) {
@@ -790,6 +790,7 @@ function buyProducts(id) {
     })
 }
 
+// eliminarea unui anumit produs din lista
 function deleteFromCart(id) {
     cart = cart.filter(item => item.id != id)
     let finalQuantity = parseInt($("#quantity-in-cart").val()) - 1
@@ -800,11 +801,7 @@ function deleteFromCart(id) {
     cartClick()
 }
 
-function filterByCategory(category) {
-    const arr = clothes.filter(item => item.category === category)
-    showProducts(arr,  rate[$("#currency").val()])
-}
-
+// crearea filtrelor
 function createFilterByCategory() {
     $("#filter-by-category").html(`
         <h3 id="category-title" class="filter-title">Category <i id="display-filters-arrow" class="fa-solid fa-angle-down"></i></h3>
@@ -909,17 +906,25 @@ function createFilterByPrice() {
     $("#price-title").click(() => closeOpenFilter("price"))
 }
 
+// deschide, inchide un filtru
 function closeOpenFilter(title) {
     $(`#${title}-items`).toggle()
     $(`#${title}-title`).children("i").toggleClass("fa-angle-down")
     $(`#${title}-title`).children("i").toggleClass("fa-angle-up")
 }
 
+// recrearea filtrelor astfel se reseteaza valorile filtrelor
 function resetFilters() {    
     createFilterByCategory()
     createFilterByType()
     createFilterByColor()
     createFilterByPrice()
+}
+
+// filtrarea produselor dupa categorie 
+function filterByCategory(category) {
+    const arr = clothes.filter(item => item.category === category)
+    showProducts(arr,  rate[$("#currency").val()])
 }
 
 resetFilters()
