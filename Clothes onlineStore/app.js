@@ -602,9 +602,17 @@ const clothes = [
 ]
 const rate = {}
 const currencySimbols = { usd: "$" , eur: "€" , mdl: "Lei" }
+
 let cart = JSON.parse(localStorage.getItem("clothesCart")) || []
 let cartOnScreen = false
 let filtersContainer = false
+let changedCategory = []
+let changedTypes = []
+let changedColors = []
+const ascDesc = { value: "", }
+const maxPrice = { value: 0, }
+const minPrice = { value: 0, }
+let tempArr = clothes.map(item => item)
 
 extractFromLocalStorage()
 
@@ -631,8 +639,8 @@ function setCurrencyInfo(){
     $("#navbar-2").html("")
     $("#navbar-2").append(`
         <div class="currency-info">
-            <h3>1$ => ${rate.eur}€</h3>
-            <h3>1$ => ${rate.mdl}Lei</h3>
+            <h3 id="rate-eur" value="${rate.eur}">1$ => ${rate.eur}€</h3>
+            <h3 id="rate-mdl" value="${rate.mdl}">1$ => ${rate.mdl}Lei</h3>
         </div>
     `)
 }
@@ -642,29 +650,84 @@ function showProducts(arr, rateValue) {
     $("#main").html("")
     $("#quantity-in-cart").attr("value", `${cart.length}`)
     $("#quantity-in-cart").html(`${cart.length}`)
-    arr.forEach(item => {
-        // calcularea pretului intr-o anumita valuta
-        let price = item.price * rateValue
-        $("#main").removeClass("main-cart")
-        $("#main").addClass("main")
-        if (item.stock > 0) {
-            $("#main").append(`
-                <div class="product col-3 d-flex flex-column justify-content-around align-items-center text-light border border-light p-3">
-                    <img src="${item.image}" alt="${item.color} ${item.type}" class="img"/>
-                    <h4>${item.name}</h4>
-                    <p>${item.description}</p>
-                    <small class="stock text-danger"><span>In Stock:</span> ${item.stock}</small>
-                    <h1 class="price text-success">${price.toFixed(2)} ${currencySimbols[$("#currency").val()]}</h1>
-                    <button id="btn-${item.id}" class="btn btn-outline-success container" onclick=addToCart(${item.id})>Add to Cart</button>
-                </div>
+    if (cartOnScreen) {
+        if(arr.length > 0) {
+            arr.forEach(item => {
+                let price = item.price * rate[$("#currency").val()]
+                $("#main").append(`
+                    <div class="products-cart col-12 row border border-light p-4">
+                        <img src="${item.image}" alt="${item.color} ${item.type}" class="img-in-cart col-4"/>
+                        <div class="description col-4 d-flex flex-column justify-content-around">
+                            <div class="d-flex flex-column align-items-start">
+                                <h4 class="text-light">${item.name}</h4>
+                                <p class="text-light">${item.description}</p>
+                            </div>
+                            <div class="d-flex flex-column align-items-start">
+                                <small class="stock text-danger">In Stock: ${item.stock}</small>
+                                <h1 class="price text-success">Price: <span id="price-${item.id}">${price.toFixed(2)}</span> ${currencySimbols[$("#currency").val()]}</h1>
+                            </div>
+                        </div>
+                        <div class="control-buy col-4 d-flex flex-column justify-content-around">
+                            <button class="buy btn btn-outline-danger" onclick=deleteFromCart(${item.id})>Delete from Cart</button>
+                            <div class="set-quantity row p-2">
+                                <button class="decr btn btn-danger col-2 rounded-0"  onclick=decrement(${item.id})>-</button>
+                                <label id="quantity-${item.id}" class="input-group-text col-8 rounded-0">1</label>   
+                                <button class="incr btn btn-success col-2 rounded-0" onclick=increment(${item.id})>+</button>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <h3 class="text-success">Total Price: <span id="total-${item.id}">${price.toFixed(2)}</span> ${currencySimbols[$("#currency").val()]}</h3>
+                                <button class="buy btn btn-outline-success" onclick=buyProducts(${item.id})>Buy now</button>
+                            </div>
+                        </div>
+                    </div>
+                `)
+                $(`#quantity-${item.id}`).change(() => {
+                    let value = $(`#quantity-${item.id}`).val()
+                    if(parseInt(value) >= item.stock) {
+                        alert("Stock is too low!!!")
+                    }
+                    if(value.length = 0) {
+                        $(`#quantity-${item.id}`).attr("value",1)
+                    } 
+                })
+            })
+        } else {
+            $("#main").html(`
+            <div class="product row">
+                <h1 class="error-message col-12 text-center text-danger p-5">Your cart is empty!</h1>
+            </div>
             `)
         }
-    })
-    cart.forEach(item => {
-        $(`#btn-${item.id}`).html(`<i class="fa-solid fa-check" style="font-weight: bold;"></i> In Cart!`)
-        $(`#btn-${item.id}`).removeClass("btn-outline-success")
-        $(`#btn-${item.id}`).addClass("btn-success") 
-    })
+    } else {
+        if (arr.length > 0) {
+            arr.forEach(item => {
+                // calcularea pretului intr-o anumita valuta
+                let price = item.price * rateValue
+                if (item.stock > 0) {
+                    $("#main").append(`
+                        <div class="product col-3 d-flex flex-column justify-content-around align-items-center text-light border border-light p-3">
+                            <img src="${item.image}" alt="${item.color} ${item.type}" class="img"/>
+                            <h4>${item.name}</h4>
+                            <p>${item.description}</p>
+                            <small class="stock text-danger"><span>In Stock:</span> ${item.stock}</small>
+                            <h1 class="price text-success">${price.toFixed(2)} ${currencySimbols[$("#currency").val()]}</h1>
+                            <button id="btn-${item.id}" class="btn btn-outline-success container" onclick=addToCart(${item.id})>Add to Cart</button>
+                        </div>
+                    `)
+                }
+            })
+        } else {
+            $("#main").append(`
+                <h1 class="text-danger col-12 text-center">Products are not found!</h1> 
+            `)
+        }
+        cart.forEach(item => {
+            $(`#btn-${item.id}`).html(`<i class="fa-solid fa-check" style="font-weight: bold;"></i> In Cart!`)
+            $(`#btn-${item.id}`).removeClass("btn-outline-success")
+            $(`#btn-${item.id}`).addClass("btn-success") 
+        })
+    }
+    
 }
 
 function extractFromLocalStorage() {    
@@ -693,65 +756,6 @@ function addToCart(id) {
         localStorage.setItem("clothesCart", JSON.stringify(cart))
         $("#quantity-in-cart").attr("value", `${cart.length}`)
         $("#quantity-in-cart").html(`${cart.length}`)
-    }
-}
-
-// afisarea produselor din Cart (la tastarea repetata se afiseaza produsele de pe pagina principala)
-function cartClick() {
-    if(!cartOnScreen) {
-        $("#main").html("")
-        if(cart.length > 0) {
-            cart.forEach(item => {
-                let price = item.price * rate[$("#currency").val()]
-                $("#main").removeClass("main")
-                $("#main").addClass("main-cart")
-                $("#main").append(`
-                    <div class="product-cart">
-                        <img src="${item.image}" alt="${item.color} ${item.type}" class="img"/>
-                        <div class="description">
-                            <h4>${item.name}</h4>
-                            <p>${item.description}</p>
-                            <small class="stock"><span style="color: black;">In Stock:</span> ${item.stock}</small>
-                            <h1 class="price"><span style="color: black;">Price:</span> <span id="price-${item.id}">${price.toFixed(2)}</span> ${currencySimbols[$("#currency").val()]}</h1>
-                        </div>
-                        <div class="control-buy">
-                            <button class="buy btn" style="color: red;" onclick=deleteFromCart(${item.id})>Delete from Cart</button>
-                            <div class="set-quantity">
-                                <button class="decr" style="border-right: 2px solid black;" onclick=decrement(${item.id})>-</button>
-                                <label id="quantity-${item.id}">1</label>   
-                                <button class="incr" style="border-left: 2px solid black;" onclick=increment(${item.id})>+</button>
-                            </div>
-                            <h3 style="color: green;"><span style="color: black;">Total Price:</span> <span id="total-${item.id}">${price.toFixed(2)}</span> ${currencySimbols[$("#currency").val()]}</h3>
-                            <button class="buy btn" onclick=buyProducts(${item.id})>Buy</button>
-                        </div>
-                    </div>
-                `)
-                $(`#quantity-${item.id}`).change(() => {
-                    let value = $(`#quantity-${item.id}`).val()
-                    if(parseInt(value) >= item.stock) {
-                        alert("Stock is too low!!!")
-                    }
-                    if(value.length = 0) {
-                        $(`#quantity-${item.id}`).attr("value",1)
-                    } 
-                })
-            })
-        } else {
-            $("#main").html(`
-            <div class="product">
-                <h1 class="error-message">Your cart is empty!</h1>
-            </div>
-            `)
-            $("#main").removeClass("main")
-            $("#main").addClass("cart-empty")
-        }
-        cartOnScreen = true
-    } else {
-        $("#main").removeClass("cart-empty")
-        $("#main").removeClass("main-cart")
-        $("#main").addClass("main")
-        extractFromLocalStorage()
-        cartOnScreen = false
     }
 }
 
@@ -813,7 +817,7 @@ function createFilterByCategory() {
             categories.push(item.category)
             $("#category-items").append(`
                 <div id="filter-${item.category}" class="filter">
-                    <input type="checkbox" name="category" id="${item.category}">
+                    <input type="checkbox" name="category" id="${item.category}" value="${item.category}">
                     <label for="${item.category}">${item.category.toLowerCase()}</label>
                 </div>
             `)
@@ -836,7 +840,7 @@ function createFilterByType() {
             types.push(item.type)
             $("#type-items").append(`
                 <div id="filter-${item.type}" class="filter">
-                    <input type="checkbox" name="type" id="${item.type}">
+                    <input type="checkbox" name="type" id="${item.type}" value="${item.type}">
                     <label for="${item.type}">${item.type.toLowerCase()}</label>
                 </div>
             `)
@@ -859,7 +863,7 @@ function createFilterByColor() {
             colors.push(item.color)
             $("#color-items").append(`
                 <div id="filter-${item.color}" class="filter">
-                    <input type="checkbox" name="color" id="${item.color}">
+                    <input type="checkbox" name="color" id="${item.color}" value="${item.color}">
                     <label for="${item.color}">${item.color.toLowerCase()}</label>
                 </div>
             `)
@@ -880,24 +884,22 @@ function createFilterByPrice() {
     $("#price-items").append(`
         <div id="asc-desc" class="filter">
             <div class="filter">
-                <input type="radio" id="asc" name="asc-desc">
-                <label for="asc">Expensive</label>
+                <input type="radio" id="asc" name="asc-desc" value="asc">
+                <label for="asc">Cheaper</label>
             </div>
             <div class="filter">
-                <input type="radio" id="desc" name="asc-desc">
-                <label for="desc">Cheaper</label>
+                <input type="radio" id="desc" name="asc-desc" value="desc">
+                <label for="desc">Expensiver</label>
             </div>
         </div>
         <br>
         <div id="between" class="filter">
-            <label for="min-price">Minimal Price</label>
+            <label for="min-price" class="h5">Minimal Price</label>
             <br>
-            <input type="number" id="min-price">
+            <input type="number" id="min-price" class="input-group-text">
+            <label for="max-price" class="h5">Maximal Price</label>
             <br>
-            <br>
-            <label for="max-price">Maximal Price</label>
-            <br>
-            <input type="number" id="max-price">
+            <input type="number" id="max-price" class="input-group-text">
         </div>
     `)
 
@@ -913,30 +915,204 @@ function closeOpenFilter(title) {
     $(`#${title}-title`).children("i").toggleClass("fa-angle-up")
 }
 
-// recrearea filtrelor astfel se reseteaza valorile filtrelor
+// recrearea filtrelor pentru a reseta valorile acestora
 function resetFilters() {    
+    changedCategory = []
+    changedTypes = []
+    changedColors = []
+    ascDesc.value = ""
+    maxPrice.value = 0
+    minPrice.value = 0
     createFilterByCategory()
     createFilterByType()
     createFilterByColor()
     createFilterByPrice()
-}
-
-// filtrarea produselor dupa categorie 
-function filterByCategory(category) {
-    const arr = clothes.filter(item => item.category === category)
-    showProducts(arr,  rate[$("#currency").val()])
+    setEventsForCategory()
+    setEventsForType()
+    setEventsForColor()
+    setEventsForPrice()
+    filterProducts()
 }
 
 resetFilters()
 
+// filtrarea produselor dupa categorie 
+function filterByCategory(categories) {
+    let result = []
+    if (categories.length > 0) {
+        categories.forEach(catItem => {
+            tempArr.forEach(item => {
+                if (item.category === catItem && result !== item) {
+                    result.push(item)
+                }
+            })
+        })
+        tempArr = result.map(item => item)
+    }
+}
+
+// filtrarea dupa tip
+function filterByType(types) {
+    let result = []
+    if (types.length > 0) {
+        types.forEach(typeItem => {
+            tempArr.forEach(item => {
+                if (item.type === typeItem && result !== item) {
+                    result.push(item)
+                }
+            })
+        })
+        tempArr = result.map(item => item)
+    }
+}
+
+// filtrarea dupa culoare
+function filterByColor(colors) {
+    colors.forEach(colorItem => {
+        tempArr = tempArr.filter(item => item.color === colorItem)
+    })
+}
+
+// filtrarea dupa pret
+function filterByPrice(minPrice, maxPrice, ascDesc) {
+    if (maxPrice > 0) {    
+        tempArr = tempArr.filter(item => item.price > minPrice && item.price < maxPrice)
+    } else {
+        tempArr = tempArr.filter(item => item.price > minPrice)
+    }
+    switch (ascDesc) {
+        case "desc":
+            tempArr.sort((item, prevItem) => {
+                return prevItem.price - item.price
+            })
+            break
+        case "asc":
+            tempArr.sort((item, prevItem) => {
+                return item.price - prevItem.price
+            })
+            break
+    }
+}
+
+// filtrarea produselor
+function filterProducts() {
+    if (cartOnScreen) {
+        tempArr = cart.map(item => item)
+    } else {
+        tempArr = clothes.map(item => item)
+    }
+    filterByCategory(changedCategory)
+    filterByType(changedTypes)
+    filterByColor(changedTypes)
+    filterByPrice(minPrice.value, maxPrice.value, ascDesc.value)
+    showProducts(tempArr, rate[$("#currency").val()])
+}
+
+// setarea evenimentelor pentru toate filtrele
+function setEventsForCategory() {
+    const categoryNames = document.getElementsByName("category")
+    changedCategory = []
+    Array.from(categoryNames).forEach(item => {
+        item.addEventListener("change", () => {
+            if(item.checked && !changedCategory.includes(item.value)) {
+                changedCategory.push(item.value)
+            } else {
+                changedCategory.splice(changedCategory.indexOf(item.value), 1)
+            }
+            filterProducts()
+        })
+    })
+}
+
+function setEventsForType() {
+    const typeNames = document.getElementsByName("type")
+    changedTypes = []
+    Array.from(typeNames).forEach(item => {
+        item.addEventListener("change", () => {
+            if(item.checked && !changedTypes.includes(item.value)) {
+                changedTypes.push(item.value)
+            } else {
+                changedTypes.splice(changedTypes.indexOf(item.value), 1)
+            }
+            filterProducts()
+        })
+    })
+}
+
+function setEventsForColor() {
+    const colorNames = document.getElementsByName("color")
+    changedColors = []
+    Array.from(colorNames).forEach(item => {
+        item.addEventListener("change", () => {
+            if(item.checked && !changedColors.includes(item.value)) {
+                changedColors.push(item.value)
+            } else {
+                changedColors.splice(changedColors.indexOf(item.value), 1)
+            }
+            filterProducts()
+        })
+    })
+}
+
+function setEventsForPrice() {
+    ascDesc.value = ""
+    maxPrice.value = 0
+    minPrice.value = 0
+    $("#min-price").change((e) => {
+        if (e.target.value == "") {
+            $("#min-price").val(parseInt(minPrice.value))
+            minPrice.value = e.target.value
+        } else {
+            minPrice.value = parseFloat(e.target.value)
+        }
+        filterProducts()
+    })
+    $("#max-price").change((e) => {
+        if (e.target.value == "") {
+            $("#max-price").val(parseInt(maxPrice.value))
+            maxPrice.value = e.target.value
+        } else {
+            maxPrice.value = parseFloat(e.target.value)
+        }
+        filterProducts()
+    })
+    $("#min-price").click(() => {
+        if ($("#min-price").val() == 0) {
+            $("#min-price").val("")
+        }
+    })
+    $("#max-price").click(() => {
+        if ($("#max-price").val() == 0) {
+            $("#max-price").val("")
+        }
+    })
+    
+    Array.from(document.getElementsByName("asc-desc")).forEach(item => {
+        item.addEventListener("change", () => {
+            ascDesc.value = item.value
+            filterProducts()
+        })
+    })
+}
+
 $("#cart").click(() => {
-    cartClick()
+    if(!cartOnScreen) {
+        cartOnScreen = true
+    } else {
+        cartOnScreen = false
+    }
     resetFilters()
 })
 
 $("#display-filters").click(() => {
     $("#filters").toggleClass("hide-filters-container")
-    $("#filters").toggleClass("show-filters-container")
     $("#display-filters-arrow").toggleClass("fa-angle-down")
     $("#display-filters-arrow").toggleClass("fa-angle-up")
+    if (!$("#filters").hasClass("hide-filters-container")) {
+        scroll(0, 0)
+    }
+})
+
+$("#btn-reset-filters").click(() => {
+    resetFilters()
 })

@@ -15,6 +15,10 @@
     top: 0;
 }
 
+#filters {
+    width: 100%;
+}
+
 #logo-img {
     width: 80px;
     border-radius: 50%;
@@ -24,6 +28,27 @@
     width: 80%;
 }
 
+.img-in-cart {
+    height: 100%;
+}
+
 a {
     text-decoration: none;
 }
+
+#main {
+    min-height: 70vh;
+}
+
+.filter-title:hover,
+label:hover,
+input[type="checkbox"]:hover,
+input[type="radio"]:hover {
+    cursor: pointer;
+}
+
+.hide-filters-container {
+    display: none;
+}
+
+
