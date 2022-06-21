@@ -613,6 +613,7 @@ const ascDesc = { value: "", }
 const maxPrice = { value: 0, }
 const minPrice = { value: 0, }
 let tempArr = clothes.map(item => item)
+let isShearch = false
 
 extractFromLocalStorage()
 
@@ -639,8 +640,8 @@ function setCurrencyInfo(){
     $("#navbar-2").html("")
     $("#navbar-2").append(`
         <div class="currency-info">
-            <h3 id="rate-eur" value="${rate.eur}">1$ => ${rate.eur}€</h3>
-            <h3 id="rate-mdl" value="${rate.mdl}">1$ => ${rate.mdl}Lei</h3>
+            <h3>1$ => ${rate.eur}€</h3>
+            <h3>1$ => ${rate.mdl}Lei</h3>
         </div>
     `)
 }
@@ -801,8 +802,7 @@ function deleteFromCart(id) {
     $("#quantity-in-cart").attr("value", `${finalQuantity}`)
     $("#quantity-in-cart").html(`${finalQuantity}`)
     localStorage.setItem("clothesCart", JSON.stringify(cart))
-    cartOnScreen = false
-    cartClick()
+    filterProducts()
 }
 
 // crearea filtrelor
@@ -968,17 +968,26 @@ function filterByType(types) {
 
 // filtrarea dupa culoare
 function filterByColor(colors) {
-    colors.forEach(colorItem => {
-        tempArr = tempArr.filter(item => item.color === colorItem)
-    })
+    let result = []
+    if (colors.length > 0) {
+        colors.forEach(colorItem => {
+            tempArr.forEach(item => {
+                if (item.color === colorItem && result !== item) {
+                    result.push(item)
+                }
+            })
+        })
+        tempArr = result.map(item => item)
+    }
+    
 }
 
 // filtrarea dupa pret
-function filterByPrice(minPrice, maxPrice, ascDesc) {
+function filterByPrice(minPrice, maxPrice, ascDesc) {    
     if (maxPrice > 0) {    
-        tempArr = tempArr.filter(item => item.price > minPrice && item.price < maxPrice)
+        tempArr = tempArr.filter(item => parseFloat((item.price * rate[$("#currency").val()]).toFixed(2)) >= minPrice && parseFloat((item.price * rate[$("#currency").val()]).toFixed(2)) <= maxPrice)
     } else {
-        tempArr = tempArr.filter(item => item.price > minPrice)
+        tempArr = tempArr.filter(item => parseFloat((item.price * rate[$("#currency").val()]).toFixed(2)) >= minPrice)
     }
     switch (ascDesc) {
         case "desc":
@@ -996,14 +1005,17 @@ function filterByPrice(minPrice, maxPrice, ascDesc) {
 
 // filtrarea produselor
 function filterProducts() {
-    if (cartOnScreen) {
-        tempArr = cart.map(item => item)
-    } else {
-        tempArr = clothes.map(item => item)
+    if (!isShearch) {
+        if (cartOnScreen) {
+            tempArr = cart.map(item => item)
+        } else {
+            tempArr = clothes.map(item => item)
+        }
     }
+    isShearch = false
     filterByCategory(changedCategory)
     filterByType(changedTypes)
-    filterByColor(changedTypes)
+    filterByColor(changedColors)
     filterByPrice(minPrice.value, maxPrice.value, ascDesc.value)
     showProducts(tempArr, rate[$("#currency").val()])
 }
@@ -1060,8 +1072,8 @@ function setEventsForPrice() {
     minPrice.value = 0
     $("#min-price").change((e) => {
         if (e.target.value == "") {
-            $("#min-price").val(parseInt(minPrice.value))
-            minPrice.value = e.target.value
+            $("#min-price").val("")
+            minPrice.value = 0
         } else {
             minPrice.value = parseFloat(e.target.value)
         }
@@ -1069,8 +1081,8 @@ function setEventsForPrice() {
     })
     $("#max-price").change((e) => {
         if (e.target.value == "") {
-            $("#max-price").val(parseInt(maxPrice.value))
-            maxPrice.value = e.target.value
+            $("#max-price").val("")
+            maxPrice.value = 0
         } else {
             maxPrice.value = parseFloat(e.target.value)
         }
@@ -1095,6 +1107,16 @@ function setEventsForPrice() {
     })
 }
 
+// cautarea produselor
+function shearhProducts(val) {
+    filterProducts()
+    if (val.length > 1) {
+        tempArr = tempArr.filter(item => item.name.toLowerCase().includes(val) || item.description.toLowerCase().includes(val))
+    isShearch = true
+    }
+    filterProducts()
+}
+
 $("#cart").click(() => {
     if(!cartOnScreen) {
         cartOnScreen = true
@@ -1115,4 +1137,18 @@ $("#display-filters").click(() => {
 
 $("#btn-reset-filters").click(() => {
     resetFilters()
+})
+
+$("#search-input").keydown((e) => {
+    if (e.key === "Enter") {
+        document.getElementById("search-btn").click()
+    }
+})
+$("#search-input").blur(() => {
+    if ($("#search-input").val().length === 0) {
+        document.getElementById("search-btn").click()
+    }
+})
+$("#search-btn").click(() => {
+    shearhProducts($("#search-input").val())
 })

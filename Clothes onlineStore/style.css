@@ -51,4 +51,19 @@ input[type="radio"]:hover {
     display: none;
 }
 
+@media only screen and (max-width: 992px) {
+    .currency-info h3 {
+        font-size: larger;
+    }
+    #filters h3,
+    #filters h1 {
+        font-size: larger;
+    }
+    #filters h1 {
+        font-weight: bold;
+    }
+    #btn-reset-filters {
+
+    }
+}
 
