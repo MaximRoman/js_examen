@@ -628,10 +628,9 @@ async function getCurrencyData() {
     rate.mdl = parseFloat(result.usd.mdl.toFixed(2))
     setCurrencyInfo()
     if (!cartOnScreen) {    
-        showProducts(clothes, rate[$("#currency").val()])
+        filterProducts()
     } else {
-        cartOnScreen = false
-        cartClick()
+        filterProducts()
     }
 }
 
@@ -639,9 +638,9 @@ async function getCurrencyData() {
 function setCurrencyInfo(){
     $("#navbar-2").html("")
     $("#navbar-2").append(`
-        <div class="currency-info">
-            <h3>1$ => ${rate.eur}€</h3>
-            <h3>1$ => ${rate.mdl}Lei</h3>
+        <div class="currency-info row">
+            <h3 class="col-sm-12 col-4">[ 1$ => ${rate.eur}€ ]</h3>
+            <h3 class="col-sm-12 col-4">[ 1$ => ${rate.mdl}Lei ]</h3>
         </div>
     `)
 }
@@ -656,9 +655,11 @@ function showProducts(arr, rateValue) {
             arr.forEach(item => {
                 let price = item.price * rate[$("#currency").val()]
                 $("#main").append(`
-                    <div class="products-cart col-12 row border border-light p-4">
-                        <img src="${item.image}" alt="${item.color} ${item.type}" class="img-in-cart col-4"/>
-                        <div class="description col-4 d-flex flex-column justify-content-around">
+                    <div class="products-cart col-md-12 col-8 row border border-light p-4">
+                        <div class="col-md-4 d-flex jsutify-content-center" >
+                            <img src="${item.image}" alt="${item.color} ${item.type}" class="img-in-cart p-0 m-0"/>
+                        </div>
+                        <div class="description col-md-4 d-flex flex-column justify-content-around">
                             <div class="d-flex flex-column align-items-start">
                                 <h4 class="text-light">${item.name}</h4>
                                 <p class="text-light">${item.description}</p>
@@ -668,7 +669,7 @@ function showProducts(arr, rateValue) {
                                 <h1 class="price text-success">Price: <span id="price-${item.id}">${price.toFixed(2)}</span> ${currencySimbols[$("#currency").val()]}</h1>
                             </div>
                         </div>
-                        <div class="control-buy col-4 d-flex flex-column justify-content-around">
+                        <div class="control-buy col-md-4 d-flex flex-column justify-content-around">
                             <button class="buy btn btn-outline-danger" onclick=deleteFromCart(${item.id})>Delete from Cart</button>
                             <div class="set-quantity row p-2">
                                 <button class="decr btn btn-danger col-2 rounded-0"  onclick=decrement(${item.id})>-</button>
@@ -706,8 +707,8 @@ function showProducts(arr, rateValue) {
                 let price = item.price * rateValue
                 if (item.stock > 0) {
                     $("#main").append(`
-                        <div class="product col-3 d-flex flex-column justify-content-around align-items-center text-light border border-light p-3">
-                            <img src="${item.image}" alt="${item.color} ${item.type}" class="img"/>
+                        <div class="product col-sm-3 d-flex flex-column justify-content-around align-items-center text-light border border-light p-3">
+                            <img src="${item.image}" alt="${item.color} ${item.type}" class="img pb-2"/>
                             <h4>${item.name}</h4>
                             <p>${item.description}</p>
                             <small class="stock text-danger"><span>In Stock:</span> ${item.stock}</small>
@@ -816,7 +817,7 @@ function createFilterByCategory() {
         if (categories.filter(catItem => catItem === item.category).length === 0) {
             categories.push(item.category)
             $("#category-items").append(`
-                <div id="filter-${item.category}" class="filter">
+                <div id="filter-${item.category}" class="filter d-flex gap-2">
                     <input type="checkbox" name="category" id="${item.category}" value="${item.category}">
                     <label for="${item.category}">${item.category.toLowerCase()}</label>
                 </div>
@@ -839,7 +840,7 @@ function createFilterByType() {
         if (types.filter(typeItem => typeItem === item.type).length === 0) {
             types.push(item.type)
             $("#type-items").append(`
-                <div id="filter-${item.type}" class="filter">
+                <div id="filter-${item.type}" class="filter d-flex gap-2">
                     <input type="checkbox" name="type" id="${item.type}" value="${item.type}">
                     <label for="${item.type}">${item.type.toLowerCase()}</label>
                 </div>
@@ -862,7 +863,7 @@ function createFilterByColor() {
         if (colors.filter(colorItem => colorItem === item.color).length === 0) {
             colors.push(item.color)
             $("#color-items").append(`
-                <div id="filter-${item.color}" class="filter">
+                <div id="filter-${item.color}" class="filter d-flex gap-2">
                     <input type="checkbox" name="color" id="${item.color}" value="${item.color}">
                     <label for="${item.color}">${item.color.toLowerCase()}</label>
                 </div>

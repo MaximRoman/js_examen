@@ -10,6 +10,10 @@
     box-sizing: border-box;
 }
 
+html {
+    font-size: 14px;
+}
+
 #header {
     position: sticky;
     top: 0;
@@ -29,7 +33,7 @@
 }
 
 .img-in-cart {
-    height: 100%;
+    width: 100%;
 }
 
 a {
@@ -52,18 +56,110 @@ input[type="radio"]:hover {
 }
 
 @media only screen and (max-width: 992px) {
-    .currency-info h3 {
-        font-size: larger;
+    h1 {
+        font-size: 28px ;
     }
-    #filters h3,
-    #filters h1 {
-        font-size: larger;
+    h2 {
+        font-size: 20px;
     }
-    #filters h1 {
-        font-weight: bold;
+    p,
+    label,
+    input[type="radio"],
+    input[type="checkbox"],
+    input  {
+       font-size: 14px !important;
     }
-    #btn-reset-filters {
+    h3 {
+        font-size: 18px;
+    }
+    #logo-img {
+        width: 50px;
+    }
+    button,
+    input[type="text"],
+    select {
+        font-size: 12px !important;
+    }
+    #quantity-in-cart,
+    #cart {
+        font-size: 26px !important;
+    }
+    #filters-logo,
+    #footer-logo {
+        font-size: 26px !important;
+    }
+}
 
+@media only screen and (max-width: 750px) {
+    h1 {
+        font-size: 24px;
+    }
+    h2 {
+        font-size: 16px;
+    }
+    p,
+    label,
+    input[type="radio"],
+    input[type="checkbox"],
+    input {
+       font-size: 12px !important;
+    }
+    h3 {
+        font-size: 14px;
+    }
+    h4 {
+        font-size: 16px;
+    }
+    #logo-img {
+        width: 30px;
+    }
+    button,
+    input[type="text"],
+    select {
+        font-size: 12px !important;
+    }
+    #quantity-in-cart,
+    #cart {
+        font-size: 22px !important;
+    }
+    #filters-logo,
+    #footer-logo {
+        font-size: 22px !important;
+    }
+}
+
+@media only screen and (max-width: 550px) {
+    h1 {
+        font-size: 16px;
+    }
+    p,
+    label,
+    input[type="radio"],
+    input[type="checkbox"],
+    input {
+       font-size: 10px !important;
+    }
+    h3 {
+        font-size: 10px;
+    }
+    h4 {
+        font-size: 12px;
+    }
+    #logo-img {
+        width: 25px;
+    }
+    button,
+    input[type="text"],
+    select {
+        font-size: 10px !important;
+    }
+    #quantity-in-cart,
+    #cart {
+        font-size: 16px !important;
+    }
+    #filters-logo,
+    #footer-logo {
+        font-size: 16px !important;
     }
 }
 
